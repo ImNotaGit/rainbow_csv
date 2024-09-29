@@ -5,11 +5,23 @@
 "
 "==============================================================================
 
+" I have modified this plugin to make it work for me -- I added two functions
+" rainbow_csv$manual_set1 and rainbow_csv#my_init in ../autoload/rainbow_csv.vim
+
+" I changed these to call the custom my_init function instead
+"augroup RainbowInitAuGrp
+"    autocmd!
+"    autocmd Syntax * call rainbow_csv#handle_syntax_change()
+"    autocmd BufEnter * call rainbow_csv#handle_buffer_enter()
+"augroup END
 augroup RainbowInitAuGrp
     autocmd!
-    autocmd Syntax * call rainbow_csv#handle_syntax_change()
-    autocmd BufEnter * call rainbow_csv#handle_buffer_enter()
+    autocmd BufEnter,BufNewFile *.tsv,*.bed,*.maf let g:rainbow_comment_prefix="#" | call rainbow_csv#my_init("\t")
+    autocmd BufEnter,BufNewFile *.vcf let g:rainbow_comment_prefix="##" | call rainbow_csv#my_init("\t")
+    autocmd BufEnter,BufNewFile *.csv let g:rainbow_comment_prefix="#" | call rainbow_csv#my_init(",")
 augroup END
+
+command! RainbowMyInitTsv call rainbow_csv#my_init("\t")
 
 command! RainbowDelim call rainbow_csv#manual_set('auto', 0)
 command! RainbowDelimSimple call rainbow_csv#manual_set('simple', 0)

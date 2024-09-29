@@ -5,7 +5,19 @@
 "
 "==============================================================================
 
-let s:max_columns = exists('g:rcsv_max_columns') ? g:rcsv_max_columns : 30
+"let s:max_columns = exists('g:rcsv_max_columns') ? g:rcsv_max_columns : 30
+" I increase the default from 30 to 100
+let s:max_columns = exists('g:rcsv_max_columns') ? g:rcsv_max_columns : 100
+" I add and use the following rcsv_colorlinks by default,
+" these terms works for NvChad, not sure if they work in plain vim
+let g:rcsv_colorlinks = ['NONE', 'String', 'LazyH2', 'Function', 'Identifier', 'Number', 'Keyword', '@text.underline', 'Delimiter', 'DiagnosticOk', 'DiagnosticInfo', 'LazyCommitIssue']
+
+" I also include these as default key maps
+nnoremap <expr> <C-Left> get(b:, 'rbcsv', 0) == 1 ? ':RainbowCellGoLeft<CR>' : '<C-Left>'
+nnoremap <expr> <C-Right> get(b:, 'rbcsv', 0) == 1 ? ':RainbowCellGoRight<CR>' : '<C-Right>'
+nnoremap <expr> <C-Up> get(b:, 'rbcsv', 0) == 1 ? ':RainbowCellGoUp<CR>' : '<C-Up>'
+nnoremap <expr> <C-Down> get(b:, 'rbcsv', 0) == 1 ? ':RainbowCellGoDown<CR>' : '<C-Down>'
+
 let s:rb_storage_dir = exists('g:rb_storage_dir') ? g:rb_storage_dir : $HOME . '/.rainbow_csv_storage'
 let s:table_names_settings = exists('g:table_names_settings') ? g:table_names_settings : $HOME . '/.rbql_table_names'
 let s:rainbow_table_index = exists('g:rainbow_table_index') ? g:rainbow_table_index : $HOME . '/.rbql_table_index'
@@ -1940,6 +1952,37 @@ func! rainbow_csv#manual_set(arg_policy, is_multidelim)
     call rainbow_csv#set_rainbow_filetype(delim, policy, s:get_auto_comment_prefix())
     let table_path = resolve(expand("%:p"))
     call s:update_table_record(table_path, delim, policy, '@auto_comment_prefix@')
+endfunc
+
+
+" added custom function:
+func! rainbow_csv#manual_set1(arg_policy, delim)
+    " let table_extension = expand('%:e')
+    " if table_extension == 'tsv' || table_extension == 'tab'
+    "     let delim = "\t"
+    " elseif table_extension == 'csv'
+    "     let delim = ","
+    " endif
+    let delim = a:delim
+    let policy = a:arg_policy
+    if policy == 'auto'
+        let policy = s:get_auto_policy_for_delim(delim)
+    endif
+    if delim == '"' && policy == 'quoted'
+        echoerr 'Double quote delimiter is incompatible with "quoted" policy'
+        return
+    endif
+    call rainbow_csv#set_rainbow_filetype(delim, policy, s:get_auto_comment_prefix())
+    let table_path = resolve(expand("%:p"))
+    call s:update_table_record(table_path, delim, policy, '@auto_comment_prefix@')
+endfunc
+
+
+" added custom function:
+func! rainbow_csv#my_init(delim)
+    call rainbow_csv#handle_buffer_enter()
+    call rainbow_csv#manual_set1('simple', a:delim)
+    let b:rbcsv = 1
 endfunc
 
 
